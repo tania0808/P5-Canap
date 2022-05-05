@@ -10,6 +10,18 @@ function getAllProducts(showElements) {
     })
 }
 
+getAllProducts(showAllProducts);
+
+//loop for every product of the API
+function showAllProducts(items) {
+    for (let i = 0; i < items.length; i++) {
+
+        const oneItem = items[i];
+        
+        createCard(oneItem);
+    }
+}
+
 //create and insert data for one card
 function createCard (product) {
         
