@@ -9,3 +9,34 @@ function getAllProducts(showElements) {
         showElements(items);
     })
 }
+
+//create and insert data for one card
+function createCard (product) {
+        
+    const items = document.getElementById('items');
+
+    //Link
+    const itemCard = document.createElement('a');
+    itemCard.setAttribute('href', `./product.html?id=${product._id}`)
+    items.appendChild(itemCard);
+    
+    //article
+    const itemCardArticle = document.createElement('article');
+    itemCard.appendChild(itemCardArticle);
+    
+    //images
+    const itemCardImage = document.createElement('img');
+    itemCardImage.setAttribute('src', `${product.imageUrl}`);
+    itemCardImage.setAttribute('alt', `${product.altTxt}` )
+    itemCardArticle.appendChild(itemCardImage);
+
+    //h3
+    const itemCardTitle = document.createElement('h3');
+    itemCardTitle.innerText = product.name;
+    itemCardArticle.appendChild(itemCardTitle);
+
+    //description
+    const itemCardDescription = document.createElement('p');
+    itemCardDescription.innerText = product.description;
+    itemCardArticle.appendChild(itemCardDescription);
+}
