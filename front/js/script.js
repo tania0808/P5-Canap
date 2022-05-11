@@ -5,14 +5,17 @@ function getAllProducts(showElements) {
     fetch(`${API_ROOT}/products`)
     .then(response => response.json())
     .then(items => {
-        //function to execute
+        /**
+         *executing a function in order to insert all items with the information from API
+         @param {Object []} items
+         */
         showElements(items);
     })
 }
 
 getAllProducts(showAllProducts);
 
-//loop for every product of the API
+//loop into every product of the API
 function showAllProducts(items) {
     for (let i = 0; i < items.length; i++) {
 
@@ -22,12 +25,12 @@ function showAllProducts(items) {
     }
 }
 
-//create and insert data for one card
+//create and insert data for each card
 function createCard (product) {
         
     const items = document.getElementById('items');
 
-    //Link
+    //link
     const itemCard = document.createElement('a');
     itemCard.setAttribute('href', `./product.html?id=${product._id}`)
     items.appendChild(itemCard);
