@@ -16,7 +16,7 @@ async function awaitForDataAndShowItemsFromTheCart() {
     
     showAllItemsInTheCart(productsOfCart);
     
-    calculateTotals(productsOfCart)
+    calculateTotals(productsOfCart);
     
     
     const inputField = document.querySelectorAll('.itemQuantity');
@@ -25,9 +25,7 @@ async function awaitForDataAndShowItemsFromTheCart() {
     const deleteItemBtn = document.querySelectorAll('.deleteItem');
     const sectionOfCartItems = document.getElementById('cart__items');
     const articleCartItem = document.querySelectorAll('.cart__item');
-
-    deleteItemFromTheCart(deleteItemBtn,productsOfCart, sectionOfCartItems, articleCartItem)
-
+    deleteItemFromTheCart(deleteItemBtn,productsOfCart, sectionOfCartItems, articleCartItem);
 }
 
 awaitForDataAndShowItemsFromTheCart();
@@ -40,18 +38,21 @@ awaitForDataAndShowItemsFromTheCart();
  */
 function findAndCompareItemsInAPI(item, cartProductItems) {
     let itemsLocalStorage = getItemsLocalStorage();
-    for (let i = 0; i < itemsLocalStorage.length; i++) {
-        const itemId = itemsLocalStorage[i].id;
-        const found = item.find(element => element._id == itemId);
-        cartProductItems.push({
-            'id': found._id,
-            'name': found.name,
-            'color': itemsLocalStorage[i].color,
-            'price': found.price,
-            'imgUrl': found.imageUrl,
-            'quantity' : itemsLocalStorage[i].quantity,
-            'altTxt' : found.altTxt
-        })
+
+    if (itemsLocalStorage != null) {
+        for (let i = 0; i < itemsLocalStorage.length; i++) {
+            const itemId = itemsLocalStorage[i].id;
+            const found = item.find(element => element._id == itemId);
+            cartProductItems.push({
+                'id': found._id,
+                'name': found.name,
+                'color': itemsLocalStorage[i].color,
+                'price': found.price,
+                'imgUrl': found.imageUrl,
+                'quantity' : itemsLocalStorage[i].quantity,
+                'altTxt' : found.altTxt
+            })
+        }
     }
 }
 
@@ -201,7 +202,6 @@ function updateTotals(input, cartItems) {
             localStorage.setItem('items', newLocalStorage);
 
             calculateTotals(cartItems);
-            console.log(cartItems);
         })
     }
 }
@@ -216,7 +216,6 @@ function deleteItemFromTheCart(deleteBtn,cartItems, section, article) {
             let itemsLocalStorage = getItemsLocalStorage();
 
             let indexLs = itemsLocalStorage.findIndex(element => element.id == dataId && element.color == dataColor);
-            console.log(indexLs);
 
             let indexCartItems = cartItems.findIndex(element => element.id == dataId && element.color == dataColor);
             section.removeChild(article[indexCartItems]);
@@ -232,5 +231,130 @@ function deleteItemFromTheCart(deleteBtn,cartItems, section, article) {
             console.log(cartItems);         
         })
     }
+};
+
+
+// Creation of regEx for email, adress, and simple names
+const emailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+const nameFormat = /^[A-Z][^0-9!?@#$%^&*)(':;=+/]{1,15}$/;
+const adressFormat = /^[0-9]+,* *[a-zA-Z][^0-9]*$/;
+
+// Getting values from form inputs
+const firstName = document.getElementById('firstName');
+const lastName = document.getElementById('lastName');
+const address = document.getElementById('address');
+const city = document.getElementById('city');
+const email = document.getElementById('email');
+const form = document.querySelector('.cart__order__form');
+
+
+
+function isValidForm(form) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (validName(firstName)&& validName(lastName) && validAdress(address) && validName(city) && validEmail(email)) {
+            const requestedData = {
+                contact: {
+                    firstName,
+                    lastName,
+                    address,
+                    city,
+                    email
+                },
+                products: []
+            };
+
+            const localProducts = getItemsLocalStorage();
+            
+            if (localProducts != null) {
+                for (let i = 0; i < localProducts.length; i++) {
+                    requestedData.products.push(localProducts[i].id)
+                }
+                
+            };
+            
+            requestedData.contact.firstName =  firstName.value;
+            requestedData.contact.lastName = lastName.value;
+            requestedData.contact.address = address.value;
+            requestedData.contact.city = city.value;
+            requestedData.contact.email = email.value;
+            
+
+            // POST order information to API, get orderId and redirection to confirmation page
+            if (localProducts == null) {
+                alert('Veuillez choisir des produits, votre panier est vide')
+            } else {
+                getOrderIdAndShowOrderNumber(requestedData)
+            }
+        }
+        else {
+            return false;
+        }
+    })
 }
+
+isValidForm(form);
+
+
+const validName = function (inputName) {
+    //création de la regex pour la validation de nom
+    const nameFormat = /^[A-Z][^0-9!?@#$%^&*)(':;=+/]{1,15}$/;
+    if (inputName.value.match(nameFormat)) {
+        inputName.nextElementSibling.innerText = "";
+        return true;
+    } else {
+        inputName.nextElementSibling.innerText = "Votre nom n'est pas valide";
+        return false;
+    }
+}
+const validAdress = function(inputName) {
+    //création de la regex pour la validation d'adresse
+    const adressFormat = /^[0-9]+,* *[a-zA-Z][^0-9]*$/;
+    if (inputName.value.match(adressFormat)) {
+        inputName.nextElementSibling.innerText = "";
+        return true;
+    } else {
+        inputName.nextElementSibling.innerText = "Votre adresse n'est pas valide, veuillez indiquez le numero de la voie";
+        return false;
+    }
+}
+const validEmail = function (inputName) {
+    //création de la regex pour la validation d'email
+    const emailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (inputName.value.match(emailFormat)) {
+        inputName.nextElementSibling.innerText = "";
+        return true;
+    } else {
+        inputName.nextElementSibling.innerText = "Votre adresse mail n'est pas valide, ex: exemple@domain.com";
+        return false;
+    }
+}
+
+const getOrderIdAndShowOrderNumber = function(requestedData){
+    fetch(`${API_ROOT}/products/order`, {
+        method: 'POST',
+        body: JSON.stringify(requestedData),
+        headers: {"Content-type": "application/json; charset=UTF-8"}
+    })
+    .then(response => response.json())
+    .then(json => {
+                redirectionToConfirmationPage(json.orderId);
+                localStorage.clear();
+            })
+    .catch(err => console.log(err));
+} 
+
+function redirectionToConfirmationPage(url) {
+    document.location.href = `confirmation.html?id=${url}`;
+}
+
+
+
+
+
+
+
+
+
+
 
