@@ -247,8 +247,16 @@ const city = document.getElementById('city');
 const email = document.getElementById('email');
 const form = document.querySelector('.cart__order__form');
 
+// HTML elements for errror messages
+const emptyCartMsg = document.createElement('p');
+const submitContainer = document.querySelector('.cart__order__form__submit');
+submitContainer.style.flexDirection = "column";
+emptyCartMsg.style.textAlign = 'center';
+emptyCartMsg.style.color = '#fbbcbc';
+submitContainer.appendChild(emptyCartMsg);
 
 
+// Valadation of the form and if all data is valid, create an object which contain requested data to an API
 function isValidForm(form) {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -266,13 +274,13 @@ function isValidForm(form) {
 
             const localProducts = getItemsLocalStorage();
             
+            // get the id's of all products in the cart and add them to requestedData.products array
             if (localProducts != null) {
                 for (let i = 0; i < localProducts.length; i++) {
                     requestedData.products.push(localProducts[i].id)
                 }
-                
             };
-            
+            // fill the requestedData.contact object with contact information
             requestedData.contact.firstName =  firstName.value;
             requestedData.contact.lastName = lastName.value;
             requestedData.contact.address = address.value;
@@ -281,10 +289,11 @@ function isValidForm(form) {
             
 
             // POST order information to API, get orderId and redirection to confirmation page
+            // if the cart is empty, display error message
             if (localProducts == null) {
-                alert('Veuillez choisir des produits, votre panier est vide')
+                emptyCartMsg.innerText = 'Veuillez choisir des produits, votre panier est vide';
             } else {
-                getOrderIdAndShowOrderNumber(requestedData)
+                postInformationToApiAndShowOrderNumber(requestedData)
             }
         }
         else {
@@ -295,7 +304,7 @@ function isValidForm(form) {
 
 isValidForm(form);
 
-
+// validation of simple input ex. name, surname, city (without numbers and some special characters)
 const validName = function (inputName) {
     //création de la regex pour la validation de nom
     const nameFormat = /^[A-Z][^0-9!?@#$%^&*)(':;=+/]{1,15}$/;
@@ -307,6 +316,8 @@ const validName = function (inputName) {
         return false;
     }
 }
+
+// validation of adress input (number of street is necessary)
 const validAdress = function(inputName) {
     //création de la regex pour la validation d'adresse
     const adressFormat = /^[0-9]+,* *[a-zA-Z][^0-9]*$/;
@@ -318,6 +329,8 @@ const validAdress = function(inputName) {
         return false;
     }
 }
+
+// validation of email
 const validEmail = function (inputName) {
     //création de la regex pour la validation d'email
     const emailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -330,7 +343,10 @@ const validEmail = function (inputName) {
     }
 }
 
-const getOrderIdAndShowOrderNumber = function(requestedData){
+// request data by passing the object with contact data and product id's
+// redirection to confirmation page
+// clearing localStorage after passing the order
+const postInformationToApiAndShowOrderNumber = function(requestedData){
     fetch(`${API_ROOT}/products/order`, {
         method: 'POST',
         body: JSON.stringify(requestedData),

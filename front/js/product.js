@@ -61,6 +61,13 @@ function createOptions(item, select) {
     }
 }
 
+const emptyDataMsg = document.createElement('p');
+const submitContainer = document.querySelector('.item__content__addButton');
+submitContainer.style.flexDirection = "column";
+emptyDataMsg.style.color = '#fbbcbc';
+emptyDataMsg.style.textAlign = 'center';
+submitContainer.appendChild(emptyDataMsg);
+
 // adding the event listener to button  on click
 function addEventListenerOnAddToCartBtn() {
     const btn = document.getElementById('addToCart');
@@ -72,11 +79,11 @@ function addEventListenerOnAddToCartBtn() {
         // if the color and input are valid, add them to cart and reset values
         if(isItemValid(item)) {
             addToCart(item);
-            alert('Votre commande a été bien prise en compte ! ')
+            emptyDataMsg.innerText = 'Votre commande a été bien prise en compte ! ';
             quantityInput.value = 0;
             selectBox.selectedIndex = 0;
         } else {
-            alert('La couleur et le nombre doivent être choisis !')
+            emptyDataMsg.innerText = 'La couleur et le nombre doivent être choisis !';
         }
     })
 }
@@ -99,9 +106,9 @@ function getAllItems() {
     let items = localStorage.getItem('items');
     if (items == null) {
         return [];
-    } else {
-        return JSON.parse(items)
     }
+
+    return JSON.parse(items);
 }
 
 // if in a cart the item with the same id and color already exists, the quantity changes
