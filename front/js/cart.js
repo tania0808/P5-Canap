@@ -66,7 +66,7 @@ function getItemsLocalStorage() {
 // loop through our cart and show all the products
 function showAllItemsInTheCart(items) {
     for(let i = 0; i < items.length; i++) {
-        var item = items[i]; 
+        const item = items[i]; 
         // create elements
         createProductInBasket(item);
     }
@@ -207,7 +207,7 @@ function updateTotals(input, cartItems) {
 }
 
 // delete the product from local storage and cart on click
-function deleteItemFromTheCart(deleteBtn,cartItems, section, article) { 
+function deleteItemFromTheCart(deleteBtn, cartItems, section, article) { 
     for (let i = 0; i < deleteBtn.length; i++) {
         deleteBtn[i].addEventListener("click", (event) => {
             const targetElement = event.target.closest('.cart__item').dataset;
@@ -218,7 +218,7 @@ function deleteItemFromTheCart(deleteBtn,cartItems, section, article) {
             let indexLs = itemsLocalStorage.findIndex(element => element.id == dataId && element.color == dataColor);
 
             let indexCartItems = cartItems.findIndex(element => element.id == dataId && element.color == dataColor);
-            section.removeChild(article[indexCartItems]);
+            section.removeChild(article[i]);
             
             itemsLocalStorage.splice(indexLs, 1);
             let newLocalStorage = JSON.stringify(itemsLocalStorage);
@@ -226,9 +226,7 @@ function deleteItemFromTheCart(deleteBtn,cartItems, section, article) {
 
             cartItems.splice(indexCartItems, 1);
 
-            calculateTotals(cartItems);
-            
-            console.log(cartItems);         
+            calculateTotals(cartItems);       
         })
     }
 };
@@ -247,7 +245,7 @@ const city = document.getElementById('city');
 const email = document.getElementById('email');
 const form = document.querySelector('.cart__order__form');
 
-// HTML elements for errror messages
+// HTML elements for error messages
 const emptyCartMsg = document.createElement('p');
 const submitContainer = document.querySelector('.cart__order__form__submit');
 submitContainer.style.flexDirection = "column";
@@ -290,7 +288,7 @@ function isValidForm(form) {
 
             // POST order information to API, get orderId and redirection to confirmation page
             // if the cart is empty, display error message
-            if (localProducts == null) {
+            if (localProducts == null || localProducts.length === 0) {
                 emptyCartMsg.innerText = 'Veuillez choisir des produits, votre panier est vide';
             } else {
                 postInformationToApiAndShowOrderNumber(requestedData)
@@ -360,6 +358,7 @@ const postInformationToApiAndShowOrderNumber = function(requestedData){
     .catch(err => console.log(err));
 } 
 
+// redirect to confirmation page with id passed in parametres of function
 function redirectionToConfirmationPage(url) {
     document.location.href = `confirmation.html?id=${url}`;
 }

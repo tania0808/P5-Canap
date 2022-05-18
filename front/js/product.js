@@ -7,6 +7,7 @@ function getAllProducts(showDescription) {
     fetch(`${API_ROOT}/products/${productId}`)
     .then(response => response.json())
     .then(item => {
+        document.title = item.name;
         showDescription(item);
     })
 }
